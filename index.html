@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ro'yxatdan o'tish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EFE6;
+    --paper-deep:#EAE3D2;
+    --line:#D6CDB6;
+    --ink:#232B3D;
+    --ink-soft:#5C6478;
+    --ink-faint:#9A9482;
+    --accent:#C4832A;
+    --accent-deep:#8F5A15;
+    --accent-soft:#EFDCB3;
+    --danger:#B3402A;
+    --surface:#FBF9F3;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 42px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:56px 18px 80px;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    margin:0;
+    color:var(--ink);
+  }
+  .sheet{
+    width:100%;
+    max-width:640px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:6px;
+    box-shadow:0 1px 0 rgba(35,43,61,0.04);
+    position:relative;
+    overflow:hidden;
+  }
+  .sheet::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0; left:54px;
+    width:1px;
+    background:rgba(179,64,42,0.18);
+  }
+  .head{
+    padding:38px 40px 26px 72px;
+    border-bottom:1px solid var(--line);
+  }
+  .head .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    color:var(--accent-deep);
+    margin-bottom:8px;
+  }
+  .head h1{
+    font-size:30px;
+    line-height:1.15;
+  }
+  .head p{
+    margin:10px 0 0;
+    color:var(--ink-soft);
+    font-size:14.5px;
+    max-width:44ch;
+    line-height:1.5;
+  }
+
+  .steps-track{
+    display:flex;
+    gap:0;
+    padding:0 40px 0 72px;
+    border-bottom:1px solid var(--line);
+    background:var(--paper-deep);
+  }
+  .step-tab{
+    padding:12px 0;
+    margin-right:22px;
+    font-size:12px;
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--ink-faint);
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  .step-tab.active{
+    color:var(--accent-deep);
+    border-bottom-color:var(--accent);
+  }
+  .step-tab.done{
+    color:var(--ink-soft);
+  }
+
+  .body-area{
+    padding:34px 40px 34px 72px;
+    min-height:320px;
+  }
+  .panel{ display:none; animation: rise .28s ease; }
+  .panel.active{ display:block; }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(6px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .panel h2{
+    font-size:21px;
+    margin-bottom:6px;
+  }
+  .panel .sub{
+    color:var(--ink-soft);
+    font-size:13.5px;
+    margin-bottom:26px;
+  }
+
+  .field{ margin-bottom:20px; }
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .field input{
+    width:100%;
+    border:none;
+    border-bottom:1.5px solid var(--line);
+    background:transparent;
+    padding:9px 2px;
+    font-size:16px;
+    font-family:'IBM Plex Sans', sans-serif;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{ border-bottom-color:var(--accent); }
+  .field input.invalid{ border-bottom-color:var(--danger); }
+  .field .err{
+    display:none;
+    color:var(--danger);
+    font-size:12px;
+    margin-top:6px;
+  }
+  .field.has-err .err{ display:block; }
+  .field.has-err input{ border-bottom-color:var(--danger); }
+
+  .hp{ position:absolute; left:-9999px; top:-9999px; opacity:0; }
+
+  .kurs-row{ display:flex; gap:14px; margin-bottom:26px; }
+  .kurs-choice{
+    flex:1;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 16px;
+    cursor:pointer;
+    background:var(--paper);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .kurs-choice:hover{ border-color:var(--accent-soft); }
+  .kurs-choice.selected{
+    border-color:var(--accent);
+    background:#FFFDF8;
+  }
+  .kurs-choice .num{
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .kurs-choice .lbl{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+
+  .group-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+  }
+  .group-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    text-align:center;
+    padding:11px 4px;
+    border:1.5px dashed var(--line);
+    border-radius:var(--radius);
+    cursor:pointer;
+    color:var(--ink-soft);
+    background:transparent;
+    transition:all .12s ease;
+    user-select:none;
+  }
+  .group-badge:hover{ border-color:var(--accent); color:var(--ink); }
+  .group-badge.selected{
+    border-style:solid;
+    border-color:var(--accent-deep);
+    background:var(--accent-soft);
+    color:var(--accent-deep);
+    font-weight:600;
+    transform:rotate(-1deg);
+  }
+
+  .subject-list, .teacher-list{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+  .opt-row{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    padding:13px 14px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    cursor:pointer;
+    background:transparent;
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .opt-row:hover{ border-color:var(--accent-soft); }
+  .opt-row.selected{
+    border-color:var(--accent);
+    background:#FFFDF8;
+  }
+  .opt-row .icon{
+    width:22px; height:22px;
+    flex:none;
+    color:var(--accent-deep);
+  }
+  .opt-row .txt{ font-size:14.5px; color:var(--ink); }
+  .opt-row .mark{
+    margin-left:auto;
+    width:16px; height:16px;
+    border:1.5px solid var(--line);
+    border-radius:50%;
+    flex:none;
+  }
+  .opt-row.selected .mark{
+    border-color:var(--accent-deep);
+    background:radial-gradient(circle, var(--accent-deep) 40%, transparent 42%);
+  }
+
+  .level-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+  .level-badge{
+    text-align:center;
+    padding:16px 4px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+  .level-badge:hover{ border-color:var(--accent-soft); }
+  .level-badge.selected{
+    border-color:var(--accent-deep);
+    background:var(--accent-soft);
+    color:var(--accent-deep);
+  }
+
+  .review-list{ list-style:none; padding:0; margin:0; }
+  .review-list li{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+    font-size:14.5px;
+  }
+  .review-list li:last-child{ border-bottom:none; }
+  .review-list .k{ color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; font-size:12.5px; padding-top:2px; }
+  .review-list .v{ text-align:right; font-weight:500; }
+
+  .foot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:22px 40px 30px 72px;
+    border-top:1px solid var(--line);
+  }
+  .btn{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    padding:12px 24px;
+    border-radius:var(--radius);
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:opacity .12s ease, transform .06s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-ghost{
+    background:transparent;
+    border-color:var(--line);
+    color:var(--ink-soft);
+  }
+  .btn-ghost:hover:not(:disabled){ border-color:var(--ink-faint); color:var(--ink); }
+  .btn-primary{
+    background:var(--accent-deep);
+    color:#FFF8EC;
+  }
+  .btn-primary:hover:not(:disabled){ background:#764609; }
+  .btn-primary.loading::after{
+    content:"";
+    display:inline-block;
+    width:11px; height:11px;
+    margin-left:8px;
+    border:2px solid #FFF8EC;
+    border-right-color:transparent;
+    border-radius:50%;
+    animation:spin .6s linear infinite;
+    vertical-align:middle;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .status-msg{
+    margin:0 40px 0 72px;
+    padding:14px 16px;
+    border-radius:var(--radius);
+    font-size:13.5px;
+    display:none;
+  }
+  .status-msg.show{ display:block; }
+  .status-msg.ok{ background:#EAF3E7; color:#2F5C2A; border:1px solid #C3DAB9; }
+  .status-msg.bad{ background:#F7E7E2; color:var(--danger); border:1px solid #E6BEB0; }
+
+  .done-screen{ text-align:center; padding:20px 10px 6px; }
+  .done-screen .stamp{
+    width:74px; height:74px;
+    margin:0 auto 18px;
+    border:2.5px solid var(--accent-deep);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--accent-deep);
+    transform:rotate(-6deg);
+  }
+  .done-screen h2{ font-size:22px; margin-bottom:8px; }
+  .done-screen p{ color:var(--ink-soft); font-size:14px; }
+
+  @media (max-width:560px){
+    .head, .steps-track, .body-area, .foot{ padding-left:26px; padding-right:22px; }
+    .sheet::before{ display:none; }
+    .status-msg{ margin-left:22px; margin-right:22px; }
+    .group-grid, .level-grid{ grid-template-columns:repeat(3,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="head">
+    <div class="eyebrow">TA'LIM MARKAZI &middot; RO'YXATGA OLISH</div>
+    <h1>Ro'yxatdan o'tish</h1>
+    <p>Ma'lumotlaringizni bosqichma-bosqich kiriting: shaxsiy ma'lumot, kurs va guruh, so'ng fan va o'qituvchi.</p>
+  </div>
+
+  <div class="steps-track" id="stepsTrack"></div>
+
+  <div id="statusMsg" class="status-msg"></div>
+
+  <div class="body-area" id="bodyArea">
+
+    <!-- Step 1: Shaxsiy ma'lumotlar -->
+    <section class="panel" data-step="1">
+      <h2>Shaxsiy ma'lumotlar</h2>
+      <div class="sub">Ism, familiya, sharif va telefon raqamingizni kiriting.</div>
+
+      <input type="text" class="hp" name="website" id="hpField" tabindex="-1" autocomplete="off">
+
+      <div class="field" id="f-ism">
+        <label>Ismi</label>
+        <input type="text" id="in-ism" placeholder="Masalan: Diyorbek" autocomplete="given-name">
+        <div class="err">Ismni to'g'ri kiriting (kamida 2 ta harf).</div>
+      </div>
+      <div class="field" id="f-familiya">
+        <label>Familiyasi</label>
+        <input type="text" id="in-familiya" placeholder="Masalan: Qodirov" autocomplete="family-name">
+        <div class="err">Familiyani to'g'ri kiriting (kamida 2 ta harf).</div>
+      </div>
+      <div class="field" id="f-sharif">
+        <label>Sharifi (otasining ismi)</label>
+        <input type="text" id="in-sharif" placeholder="Masalan: Baxtiyor o'g'li" autocomplete="additional-name">
+        <div class="err">Sharifni to'g'ri kiriting (kamida 2 ta harf).</div>
+      </div>
+      <div class="field" id="f-tel">
+        <label>Telefon raqami</label>
+        <input type="tel" id="in-tel" placeholder="+998 90 123 45 67" inputmode="numeric">
+        <div class="err">Telefon raqamini +998 XX XXX XX XX ko'rinishida kiriting.</div>
+      </div>
+    </section>
+
+    <!-- Step 2: Kurs va guruh -->
+    <section class="panel" data-step="2">
+      <h2>Kurs va guruh</h2>
+      <div class="sub">Avval kursingizni, so'ng guruh kodingizni tanlang.</div>
+
+      <div class="kurs-row">
+        <div class="kurs-choice" data-kurs="1">
+          <div class="num">1-kurs</div>
+          <div class="lbl">2026-yil guruhlari</div>
+        </div>
+        <div class="kurs-choice" data-kurs="2">
+          <div class="num">2-kurs</div>
+          <div class="lbl">2025-yil guruhlari</div>
+        </div>
+      </div>
+
+      <div id="groupWrap" style="display:none;">
+        <label style="display:block;font-size:12.5px;font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);margin-bottom:10px;">Guruh kodi</label>
+        <div class="group-grid" id="groupGrid"></div>
+      </div>
+    </section>
+
+    <!-- Step 3: Fan -->
+    <section class="panel" data-step="3">
+      <h2>Fan tanlash</h2>
+      <div class="sub">Qaysi fan bo'yicha ro'yxatdan o'tmoqchisiz?</div>
+      <div class="subject-list" id="subjectList"></div>
+    </section>
+
+    <!-- Step 4: O'qituvchi -->
+    <section class="panel" data-step="4">
+      <h2>O'qituvchini tanlang</h2>
+      <div class="sub" id="teacherSub">Tanlangan fan bo'yicha o'qituvchilar ro'yxati.</div>
+      <div class="teacher-list" id="teacherList"></div>
+    </section>
+
+    <!-- Step 5: Chet tili darajasi (faqat Ingliz tili uchun) -->
+    <section class="panel" data-step="5">
+      <h2>Chet tili bilish darajasi</h2>
+      <div class="sub">Ingliz tilini bilish darajangizni belgilang.</div>
+      <div class="level-grid" id="levelGrid"></div>
+    </section>
+
+    <!-- Step 6: Tasdiqlash -->
+    <section class="panel" data-step="6">
+      <h2>Ma'lumotlarni tasdiqlang</h2>
+      <div class="sub">Yuborishdan oldin barcha ma'lumotlarni tekshirib chiqing.</div>
+      <ul class="review-list" id="reviewList"></ul>
+    </section>
+
+    <!-- Yakuniy ekran -->
+    <section class="panel" data-step="done">
+      <div class="done-screen">
+        <div class="stamp">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Ro'yxatga olindingiz</h2>
+        <p>Ma'lumotlaringiz qabul qilindi. Tez orada siz bilan bog'lanamiz.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="foot" id="footArea">
+    <button class="btn btn-ghost" id="btnBack">Orqaga</button>
+    <button class="btn btn-primary" id="btnNext">Keyingisi</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ SOZLAMALAR ============
+     Google Apps Script Web App URL'ni shu yerga qo'ying.
+     (Qanday olish kerakligi haqida javobning oxirida yo'riqnoma bor.)
+  ===================================== */
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyvEWA0daZguB2Qp68hqagqMZRfh-Alyzk45yMqxmWGRYUYrXmCmRNP4lAZKI74eA3HhQ/execPASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+  /* ============ MA'LUMOTLAR ============ */
+  const SUBJECTS = [
+    { key:"Informatika", icon:"monitor" },
+    { key:"Ingliz tili", icon:"globe" },
+    { key:"Fizika", icon:"atom" },
+    { key:"Ona tili", icon:"book" },
+    { key:"Matematika", icon:"compass" },
+    { key:"Tarix", icon:"scroll" },
+    { key:"Rus tili", icon:"chat" }
+  ];
+
+  const TEACHERS = {
+    "Ingliz tili": ["Shakirjanova Mohinurbegim","Qalandarova Zilola","Annazarova Laylo","Teshabayeva Xursanoy","Raximova Laylo","Xudayberganova Sevara","Sultanova Nasiba","Ismailova Dinora","Aitbayeva Naziraxon","Rustamboyeva Nasiba","Ro‘zimova Charos","Karimboyeva Durdona","Xudoyorova Fotimajon","Olimboyev Alisher","Urozboyeva Gulnoza","Masharipova Nodira","Atabayeva Zevarjon"],
+    "Informatika": ["Ollaberganov Akmal","Otaboyev Shahzodbek","Rustamov Rahimbergan","Rayimboyeva Yulduzxon","Atamuratova Mashxura","Matniyozova Malika","Abdullaeva Fotima","Abdirimov Jamoladdin","Qurbanbayeva Nigora","Bahodirova Zulayho","Matyaqubov Ibrohimbek","Egamberdiyeva Nodira","Sultonboyeva Saida","Ollaberganov Shoxrux","Ollaberganov Bekzod","Aminov Jayhunbek","Matnazarov Muhammad-Ibrohim","Qurbanov Jahongir","Yo‘ldashov Temurbek","Aminov Xurmatbek","Ravshanova Maftuna","Karimboyev Dilshodbek","Erkinov G‘anisher","Bazarboyev Nurbek","Qurbonboyeva Shaxnoza"],
+    "Fizika": ["Botirova Iroda"],
+    "Ona tili": ["Raximova Dinora","Polvonova Laylo","Salimova Aziza"],
+    "Rus tili": ["Komilva Asaloy","Erkinbayeva Sevara"],
+    "Tarix": ["Masharipov Jahongir","Bozorboyev Diyorbek"],
+    "Matematika": ["Saidmetov Bunyodbek","Sultanova Dinora"]
+  };
+
+  const LEVELS = ["Sefr","B1","B2","C1","Yo'q"];
+
+  const ICONS = {
+    monitor:'<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="1.4" stroke="currentColor" stroke-width="1.7"/><path d="M8 20h8M12 16v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    globe:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.7"/><path d="M3.6 12h16.8M12 3.6c2.6 2.4 2.6 14.4 0 16.8M12 3.6c-2.6 2.4-2.6 14.4 0 16.8" stroke="currentColor" stroke-width="1.5"/></svg>',
+    atom:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="1.8" fill="currentColor"/><ellipse cx="12" cy="12" rx="9" ry="3.6" stroke="currentColor" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="9" ry="3.6" stroke="currentColor" stroke-width="1.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" stroke="currentColor" stroke-width="1.5" transform="rotate(120 12 12)"/></svg>',
+    book:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5c2.4-1.1 5-1.1 8 0v13c-3-1.1-5.6-1.1-8 0v-13Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 5.5c-2.4-1.1-5-1.1-8 0v13c3-1.1 5.6-1.1 8 0v-13Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+    compass:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.6" stroke="currentColor" stroke-width="1.7"/><path d="M14.6 9.4 13 13l-3.6 1.6L11 11l3.6-1.6Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    scroll:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 4h12v13a2.5 2.5 0 0 1-2.5 2.5H8.5A2.5 2.5 0 0 1 6 17V4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8.5h6M9 12h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    chat:'<svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5h16v10.5H9.5L5 20v-4H4V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+  };
+
+  /* ============ HOLAT (STATE) ============ */
+  const state = {
+    ism:"", familiya:"", sharif:"", tel:"",
+    kurs:null, guruh:null,
+    fan:null, oqituvchi:null,
+    daraja:null
+  };
+
+  const STEP_ORDER = ["1","2","3","4","5","6"];
+  let currentIndex = 0;
+
+  function activeStepId(){ return STEP_ORDER[currentIndex]; }
+  function needsLevelStep(){ return state.fan === "Ingliz tili"; }
+
+  function visibleSteps(){
+    return STEP_ORDER.filter(s => s !== "5" || needsLevelStep());
+  }
+
+  /* ============ TOP STEP TABS ============ */
+  const stepLabels = { "1":"Ma'lumot", "2":"Kurs", "3":"Fan", "4":"O'qituvchi", "5":"Daraja", "6":"Tasdiqlash" };
+  const stepsTrack = document.getElementById('stepsTrack');
+
+  function renderTabs(){
+    const vis = visibleSteps();
+    stepsTrack.innerHTML = vis.map((s, i) => {
+      const num = String(i+1).padStart(2,'0');
+      let cls = 'step-tab';
+      if (s === activeStepId()) cls += ' active';
+      else if (vis.indexOf(activeStepId()) > i) cls += ' done';
+      return `<div class="${cls}">${num} — ${stepLabels[s]}</div>`;
+    }).join('');
+  }
+
+  /* ============ VALIDATSIYA ============ */
+  const NAME_RE = /^[\p{L}][\p{L}\s'’ʻʼ.-]{1,49}$/u;
+
+  function normalizePhoneDigits(v){
+    return v.replace(/[^\d]/g,'');
+  }
+  function formatPhone(v){
+    let d = normalizePhoneDigits(v);
+    if (d.startsWith('998')) { /* keep */ }
+    else if (d.length && !d.startsWith('998')) { d = '998' + d.replace(/^0+/,''); }
+    d = d.slice(0,12);
+    let out = '+998';
+    const rest = d.slice(3);
+    if (rest.length > 0) out += ' ' + rest.slice(0,2);
+    if (rest.length > 2) out += ' ' + rest.slice(2,5);
+    if (rest.length > 5) out += ' ' + rest.slice(5,7);
+    if (rest.length > 7) out += ' ' + rest.slice(7,9);
+    return out;
+  }
+  function isValidPhone(v){
+    const d = normalizePhoneDigits(v);
+    return /^998\d{9}$/.test(d);
+  }
+
+  const inTel = document.getElementById('in-tel');
+  inTel.addEventListener('input', () => {
+    const pos = inTel.value.length;
+    inTel.value = formatPhone(inTel.value);
+    if (document.activeElement === inTel) {
+      inTel.setSelectionRange(inTel.value.length, inTel.value.length);
+    }
+  });
+
+  function setFieldError(fieldId, show){
+    const el = document.getElementById(fieldId);
+    el.classList.toggle('has-err', show);
+  }
+
+  function validateStep1(){
+    let ok = true;
+    const ism = document.getElementById('in-ism').value.trim();
+    const familiya = document.getElementById('in-familiya').value.trim();
+    const sharif = document.getElementById('in-sharif').value.trim();
+    const tel = document.getElementById('in-tel').value.trim();
+
+    const ismOk = NAME_RE.test(ism);
+    const familiyaOk = NAME_RE.test(familiya);
+    const sharifOk = NAME_RE.test(sharif);
+    const telOk = isValidPhone(tel);
+
+    setFieldError('f-ism', !ismOk); if(!ismOk) ok=false;
+    setFieldError('f-familiya', !familiyaOk); if(!familiyaOk) ok=false;
+    setFieldError('f-sharif', !sharifOk); if(!sharifOk) ok=false;
+    setFieldError('f-tel', !telOk); if(!telOk) ok=false;
+
+    if (ok){
+      state.ism = ism; state.familiya = familiya; state.sharif = sharif;
+      state.tel = '+' + normalizePhoneDigits(tel);
+    }
+    return ok;
+  }
+
+  ['in-ism','in-familiya','in-sharif','in-tel'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      const fieldId = 'f-' + id.replace('in-','');
+      const el = document.getElementById(fieldId);
+      if (el.classList.contains('has-err')) el.classList.remove('has-err');
+    });
+  });
+
+  /* ============ QADAM 2: KURS VA GURUH ============ */
+  function groupsForKurs(kurs){
+    const list = [];
+    if (kurs === '1'){
+      for (let m=1; m<=12; m++) list.push(String(m).padStart(2,'0') + '-26');
+      list.push('D 01-26', 'D 02-26');
+    } else if (kurs === '2'){
+      for (let m=1; m<=11; m++) list.push(String(m).padStart(2,'0') + '-25');
+    }
+    return list;
+  }
+
+  document.querySelectorAll('.kurs-choice').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.kurs-choice').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      const kurs = el.getAttribute('data-kurs');
+      state.kurs = kurs;
+      state.guruh = null;
+      renderGroupGrid(kurs);
+      document.getElementById('groupWrap').style.display = 'block';
+    });
+  });
+
+  function renderGroupGrid(kurs){
+    const grid = document.getElementById('groupGrid');
+    const groups = groupsForKurs(kurs);
+    grid.innerHTML = groups.map(g =>
+      `<div class="group-badge" data-g="${g}">${g}</div>`
+    ).join('');
+    grid.querySelectorAll('.group-badge').forEach(b => {
+      b.addEventListener('click', () => {
+        grid.querySelectorAll('.group-badge').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        state.guruh = b.getAttribute('data-g');
+      });
+    });
+  }
+
+  function validateStep2(){
+    return !!(state.kurs && state.guruh);
+  }
+
+  /* ============ QADAM 3: FAN ============ */
+  const subjectList = document.getElementById('subjectList');
+  subjectList.innerHTML = SUBJECTS.map(s =>
+    `<div class="opt-row" data-fan="${s.key}">
+       <span class="icon">${ICONS[s.icon]}</span>
+       <span class="txt">${s.key}</span>
+       <span class="mark"></span>
+     </div>`
+  ).join('');
+  subjectList.querySelectorAll('.opt-row').forEach(row => {
+    row.addEventListener('click', () => {
+      subjectList.querySelectorAll('.opt-row').forEach(x => x.classList.remove('selected'));
+      row.classList.add('selected');
+      const fan = row.getAttribute('data-fan');
+      if (state.fan !== fan) { state.oqituvchi = null; state.daraja = null; }
+      state.fan = fan;
+    });
+  });
+  function validateStep3(){ return !!state.fan; }
+
+  /* ============ QADAM 4: O'QITUVCHI ============ */
+  const teacherList = document.getElementById('teacherList');
+  const teacherSub = document.getElementById('teacherSub');
+  function renderTeachers(){
+    const fan = state.fan;
+    teacherSub.textContent = fan ? `"${fan}" fani bo'yicha o'qituvchilar ro'yxati.` : "Avval fanni tanlang.";
+    const list = TEACHERS[fan] || [];
+    teacherList.innerHTML = list.map(name =>
+      `<div class="opt-row" data-t="${name}">
+         <span class="txt">${name}</span>
+         <span class="mark"></span>
+       </div>`
+    ).join('');
+    teacherList.querySelectorAll('.opt-row').forEach(row => {
+      row.addEventListener('click', () => {
+        teacherList.querySelectorAll('.opt-row').forEach(x => x.classList.remove('selected'));
+        row.classList.add('selected');
+        state.oqituvchi = row.getAttribute('data-t');
+      });
+    });
+  }
+  function validateStep4(){ return !!state.oqituvchi; }
+
+  /* ============ QADAM 5: DARAJA (faqat Ingliz tili) ============ */
+  const levelGrid = document.getElementById('levelGrid');
+  levelGrid.innerHTML = LEVELS.map(l => `<div class="level-badge" data-l="${l}">${l}</div>`).join('');
+  levelGrid.querySelectorAll('.level-badge').forEach(b => {
+    b.addEventListener('click', () => {
+      levelGrid.querySelectorAll('.level-badge').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      state.daraja = b.getAttribute('data-l');
+    });
+  });
+  function validateStep5(){ return !needsLevelStep() || !!state.daraja; }
+
+  /* ============ QADAM 6: TASDIQLASH ============ */
+  function renderReview(){
+    const rows = [
+      ["ISM", state.ism],
+      ["FAMILIYA", state.familiya],
+      ["SHARIF", state.sharif],
+      ["TELEFON", state.tel],
+      ["KURS", state.kurs + "-kurs"],
+      ["GURUH", state.guruh],
+      ["FAN", state.fan],
+      ["O'QITUVCHI", state.oqituvchi]
+    ];
+    if (needsLevelStep()) rows.push(["DARAJA", state.daraja]);
+    document.getElementById('reviewList').innerHTML = rows.map(([k,v]) =>
+      `<li><span class="k">${k}</span><span class="v">${escapeHtml(v || '—')}</span></li>`
+    ).join('');
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, ch => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[ch]));
+  }
+
+  /* ============ NAVIGATSIYA ============ */
+  const btnBack = document.getElementById('btnBack');
+  const btnNext = document.getElementById('btnNext');
+  const footArea = document.getElementById('footArea');
+
+  function showPanel(stepId){
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.panel[data-step="${stepId}"]`).classList.add('active');
+  }
+
+  function goTo(index){
+    const vis = visibleSteps();
+    if (index < 0) index = 0;
+    if (index > vis.length - 1) index = vis.length - 1;
+    currentIndex = STEP_ORDER.indexOf(vis[index]);
+    const stepId = activeStepId();
+
+    if (stepId === '4') renderTeachers();
+    if (stepId === '6') renderReview();
+
+    showPanel(stepId);
+    renderTabs();
+
+    btnBack.style.visibility = (vis.indexOf(stepId) === 0) ? 'hidden' : 'visible';
+    btnNext.textContent = (vis[vis.length-1] === stepId) ? "Ro'yxatdan o'tish" : "Keyingisi";
+  }
+
+  const validators = { "1":validateStep1, "2":validateStep2, "3":validateStep3, "4":validateStep4, "5":validateStep5 };
+
+  btnNext.addEventListener('click', () => {
+    const stepId = activeStepId();
+    const vis = visibleSteps();
+    const posInVis = vis.indexOf(stepId);
+
+    if (stepId === '6') { submitForm(); return; }
+
+    const validator = validators[stepId];
+    if (validator && !validator()) return;
+
+    goTo(posInVis + 1);
+  });
+
+  btnBack.addEventListener('click', () => {
+    const vis = visibleSteps();
+    const posInVis = vis.indexOf(activeStepId());
+    goTo(posInVis - 1);
+  });
+
+  /* ============ YUBORISH (GOOGLE SHEETS) ============ */
+  const statusMsg = document.getElementById('statusMsg');
+
+  function showStatus(text, kind){
+    statusMsg.textContent = text;
+    statusMsg.className = 'status-msg show ' + kind;
+  }
+
+  function canSubmitNow(){
+    const last = Number(localStorage.getItem('royxat_last_submit') || 0);
+    return (Date.now() - last) > 60000;
+  }
+
+  function submitForm(){
+    // Honeypot: bot ekanini tekshirish
+    if (document.getElementById('hpField').value.trim() !== '') {
+      showStatus("Xatolik yuz berdi. Sahifani yangilab qayta urinib ko'ring.", 'bad');
+      return;
+    }
+    if (!canSubmitNow()){
+      showStatus("Iltimos, biroz kuting va qayta urinib ko'ring.", 'bad');
+      return;
+    }
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.indexOf('PASTE_YOUR') === 0){
+      showStatus("Google Sheet manzili sozlanmagan. Fayl ichidagi GAS_WEB_APP_URL qiymatini to'ldiring.", 'bad');
+      return;
+    }
+
+    // Faqat kutilgan maydonlarni yuboramiz (whitelist)
+    const payload = {
+      ism: state.ism,
+      familiya: state.familiya,
+      sharif: state.sharif,
+      tel: state.tel,
+      kurs: state.kurs + "-kurs",
+      guruh: state.guruh,
+      fan: state.fan,
+      oqituvchi: state.oqituvchi,
+      daraja: needsLevelStep() ? state.daraja : "",
+      vaqt: new Date().toISOString()
+    };
+
+    btnNext.disabled = true;
+    btnNext.classList.add('loading');
+    btnBack.disabled = true;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(() => {
+      localStorage.setItem('royxat_last_submit', String(Date.now()));
+      footArea.style.display = 'none';
+      stepsTrack.style.display = 'none';
+      showPanel('done');
+    }).catch(() => {
+      showStatus("Yuborishda xatolik yuz berdi. Internet aloqasini tekshirib qayta urinib ko'ring.", 'bad');
+    }).finally(() => {
+      btnNext.disabled = false;
+      btnNext.classList.remove('loading');
+      btnBack.disabled = false;
+    });
+  }
+
+  /* ============ BOSHLASH ============ */
+  goTo(0);
+})();
+</script>
+</body>
+</html>
